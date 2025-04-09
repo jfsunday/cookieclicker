@@ -140,5 +140,22 @@ document.getElementById("reset-button").onclick = () => {
 // Prestige-Button
 document.getElementById("prestige-button").onclick = prestige;
 
+function switchView(viewName) {
+  const gameView = document.getElementById("game-view");
+  const shopView = document.getElementById("shop-view");
+
+  if (viewName === "game") {
+    gameView.classList.remove("hidden");
+    shopView.classList.add("hidden");
+  } else if (viewName === "shop") {
+    gameView.classList.add("hidden");
+    shopView.classList.remove("hidden");
+  }
+}
+
+// Navigation zwischen Spiel und Shop
+document.getElementById("btn-game").onclick = () => switchView("game");
+document.getElementById("btn-shop").onclick = () => switchView("shop");
+
 renderShop(); // Initiale Shop-Darstellung
 updateDisplay(); // Initiale Anzeige aktualisieren
