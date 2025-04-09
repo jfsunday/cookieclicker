@@ -1,39 +1,37 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Cookie Clicker</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <nav>
     <button id="btn-game">Spiel</button>
     <button id="btn-shop">Shop</button>
+    <button id="prestige-button">Prestige</button>
+    <button id="reset-button">Reset</button>
   </nav>
 
-  <div class="view" id="game-view">
+  <div id="game-view" class="view">
     <h1>Cookie Clicker</h1>
     <h2 id="cookie-count">Cookies: 0</h2>
-    <h3 id="clickpower-info">Klickstärke: 1</h3>
-    <h3>Prestige Status: <span id="prestige-status">0</span> Punkte</h3>
-    <button id="prestige-button">Prestigieren</button>
-    <img id="cookie" src="https://cdn.pixabay.com/photo/2024/11/07/19/42/cookie-9181659_640.png" width="200" />
-    <br />
-    <button id="reset-button">Reset Spielstand</button>
-    <audio id="click-sound" src="vineboom.mp3" preload="auto"></audio>
-    <div id="achievement" class="hidden"></div>
+    <h3 id="clickpower-info">Klickstärke: 1 | CPS: 0</h3>
+    <img id="cookie" src="https://cdn.pixabay.com/photo/2024/11/07/19/42/cookie-9181659_640.png" width="200" alt="Cookie">
+    <h3 id="prestige-info">Prestige ab: 1000000</h3>
+    <audio id="click-sound" src="vineboom.mp3"></audio>
   </div>
 
-  <div class="view hidden" id="shop-view">
+  <div id="shop-view" class="view hidden">
     <h2>Shop</h2>
-    <div class="upgrade-section">
-      <h3>Klick-Upgrades (Cookies pro Klick)</h3>
-      <div id="click-upgrades"></div>
-    </div>
-    <div class="upgrade-section">
-      <h3>Passive Upgrades (Cookies pro Sekunde)</h3>
-      <div id="auto-upgrades"></div>
-    </div>
+    <h3>Click-Upgrades</h3>
+    <div id="click-upgrades"></div>
+
+    <h3>Auto-Upgrades (CPS)</h3>
+    <div id="auto-upgrades"></div>
+
+    <h3>Prestige-Upgrades</h3>
+    <div id="prestige-upgrades"></div>
   </div>
 
   <script src="script.js"></script>
