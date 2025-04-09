@@ -65,43 +65,11 @@ h1, h2, h3 {
   z-index: 100;
 }
 
-#reset-button {
-  margin-top: 1em;
-  background-color: crimson;
+.prestige-only {
+  background-color: #cc66ff;
+  border: 2px solid #9933cc;
 }
 
-#reset-button:hover {
-  background-color: darkred;
-}
-
-#prestige-button {
-  margin-top: 1em;
-  background-color: #4caf50;
-}
-
-#prestige-button:hover {
-  background-color: #45a049;
-}
-
-#prestige-status {
-  font-weight: bold;
-  color: #ff9900;
-}
-
-textarea#export-text {
-  margin-top: 1em;
-  width: 90%;
-  max-width: 500px;
-  font-family: monospace;
-  padding: 0.5em;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-}
-
-#export-button, #import-button {
-  background-color: #339966;
-}
-
-#export-button:hover, #import-button:hover {
-  background-color: #287a54;
+.prestige-only:hover {
+  background-color: #b84dff;
 }
