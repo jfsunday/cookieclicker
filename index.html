@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Cookie Clicker</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <nav>
-    <button id="btn-shop">Zum Shop</button>
-    <button id="btn-game" class="hidden">Zum Spiel</button>
+    <button id="btn-game">Spiel</button>
+    <button id="btn-shop">Shop</button>
   </nav>
 
-  <!-- Spielansicht -->
-  <div id="game-view">
+  <div class="view" id="game-view">
     <h1>Cookie Clicker</h1>
-    <img src="https://cdn.pixabay.com/photo/2024/11/07/19/42/cookie-9181659_640.png" id="cookie" alt="Cookie">
-    <p id="cookie-count">Cookies: 0</p>
-    <p id="clickpower-info">Klickstärke: 1</p>
-    <p id="prestige-info"></p>
-    <button id="prestige-button">Prestige</button>
-    <button id="reset-button">Spiel zurücksetzen</button>
+    <h2 id="cookie-count">Cookies: 0</h2>
+    <h3 id="clickpower-info">Klickstärke: 1</h3>
+    <h3>Prestige Status: <span id="prestige-status">0</span> Punkte</h3>
+    <button id="prestige-button">Prestigieren</button>
+    <img id="cookie" src="https://cdn.pixabay.com/photo/2024/11/07/19/42/cookie-9181659_640.png" width="200" />
+    <br />
+    <button id="reset-button">Reset Spielstand</button>
+    <audio id="click-sound" src="vineboom.mp3" preload="auto"></audio>
+    <div id="achievement" class="hidden"></div>
   </div>
 
-  <!-- Shopansicht -->
-  <div id="shop-view" class="hidden">
-    <h1>Cookie Clicker Shop</h1>
-
-    <h2>Klick-Upgrades</h2>
-    <div id="click-upgrades"></div>
-
-    <h2>Auto-Upgrades (CPS)</h2>
-    <div id="auto-upgrades"></div>
+  <div class="view hidden" id="shop-view">
+    <h2>Shop</h2>
+    <div class="upgrade-section">
+      <h3>Klick-Upgrades (Cookies pro Klick)</h3>
+      <div id="click-upgrades"></div>
+    </div>
+    <div class="upgrade-section">
+      <h3>Passive Upgrades (Cookies pro Sekunde)</h3>
+      <div id="auto-upgrades"></div>
+    </div>
   </div>
-
-  <audio id="click-sound" src="vineboom.mp3" preload="auto"></audio>
 
   <script src="script.js"></script>
 </body>
