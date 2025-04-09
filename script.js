@@ -27,13 +27,13 @@ const autoUpgrades = [
   { name: "Milchstraße-Proz.", price: 15000, cpsIncrease: 10 },
 ];
 
-// Neue Prestige-Upgrades
+// Neue, günstige Prestige-Upgrades
 const prestigeUpgrades = [
-  { name: "Goldene Hände", price: 500, clickPowerIncrease: 2 },
-  { name: "Himmlisches Backwerk", price: 2000, cpsIncrease: 5 },
-  { name: "Keks-Gottheit", price: 5000, cpsIncrease: 10 },
-  { name: "Universum Backen", price: 10000, clickPowerIncrease: 5 },
-  { name: "Unendliche Kekse", price: 20000, cpsIncrease: 20 },
+  { name: "Goldene Hände", price: 100, clickPowerIncrease: 2 },
+  { name: "Himmlisches Backwerk", price: 500, cpsIncrease: 5 },
+  { name: "Keks-Gottheit", price: 1000, cpsIncrease: 10 },
+  { name: "Universum Backen", price: 2000, clickPowerIncrease: 5 },
+  { name: "Unendliche Kekse", price: 5000, cpsIncrease: 20 },
 ];
 
 function updateDisplay() {
