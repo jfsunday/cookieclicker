@@ -1,24 +1,21 @@
-// Cookie Clicker Script mit Prestige, Upgrades und Auto-Cookies
 let cookies = parseInt(localStorage.getItem("cookies")) || 0;
 let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
 let prestigePoints = parseInt(localStorage.getItem("prestigePoints")) || 0;
 let cookiesPerSecond = parseFloat(localStorage.getItem("cookiesPerSecond")) || 0;
 
-const prestigeThreshold = 1000000;
 const cookieCount = document.getElementById("cookie-count");
 const clickPowerInfo = document.getElementById("clickpower-info");
-const prestigeInfo = document.getElementById("prestige-info");
 const cookieImg = document.getElementById("cookie");
 const clickSound = document.getElementById("click-sound");
 
+const prestigeThreshold = 1000000;
 let prestigeBonus = 1 + prestigePoints * 0.1;
 
 const clickUpgrades = [
-  { name: "Klickstufe 1", price: 50, increase: 1 },
-  { name: "Klickstufe 2", price: 200, increase: 2 },
-  { name: "Klickstufe 3", price: 500, increase: 3 },
-  { name: "Klickstufe 4", price: 1000, increase: 4 },
-  { name: "Klickstufe 5", price: 2000, increase: 6 }
+  { name: "Klickstärke Level 1", price: 50, increase: 1 },
+  { name: "Klickstärke Level 2", price: 200, increase: 2 },
+  { name: "Klickstärke Level 3", price: 500, increase: 3 },
+  { name: "Klickstärke Level 4", price: 1000, increase: 4 },
 ];
 
 const autoUpgrades = [
@@ -27,100 +24,49 @@ const autoUpgrades = [
   { name: "Keks-Planet", price: 2000, cpsIncrease: 2 },
   { name: "Mondbäcker", price: 4000, cpsIncrease: 4 },
   { name: "Sternensnack", price: 8000, cpsIncrease: 6 },
-  { name: "Milchstraße-Prozessor", price: 15000, cpsIncrease: 10 }
+  { name: "Milchstraße-Proz.", price: 15000, cpsIncrease: 10 },
 ];
 
+// Neue Prestige-Upgrades
 const prestigeUpgrades = [
-  { name: "Goldene Hände", price: 5000, type: "click", increase: 2, requiredPrestige: 1 },
-  { name: "Himmlisches Backwerk", price: 10000, type: "cps", increase: 5, requiredPrestige: 1 },
-  { name: "Keks-Gottheit", price: 20000, type: "cps", increase: 10, requiredPrestige: 2 }
+  { name: "Goldene Hände", price: 500, clickPowerIncrease: 2 },
+  { name: "Himmlisches Backwerk", price: 2000, cpsIncrease: 5 },
+  { name: "Keks-Gottheit", price: 5000, cpsIncrease: 10 },
+  { name: "Universum Backen", price: 10000, clickPowerIncrease: 5 },
+  { name: "Unendliche Kekse", price: 20000, cpsIncrease: 20 },
 ];
 
 function updateDisplay() {
   cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
-  clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond.toFixed(1)}`;
-  prestigeInfo.textContent = cookies >= prestigeThreshold
-    ? `Du kannst Prestige aktivieren!`
-    : `Prestige ab: ${prestigeThreshold} (Fehlen: ${prestigeThreshold - cookies})`;
+  clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond}`;
+
+  const prestigeInfo = document.getElementById("prestige-info");
+  if (cookies >= prestigeThreshold) {
+    prestigeInfo.textContent = `Du kannst Prestige aktivieren!`;
+  } else {
+    const fehlend = prestigeThreshold - cookies;
+    prestigeInfo.textContent = `Prestige ab: ${prestigeThreshold.toLocaleString()} Cookies (Fehlen noch: ${Math.floor(fehlend).toLocaleString()})`;
+  }
 
   localStorage.setItem("cookies", cookies);
   localStorage.setItem("clickPower", clickPower);
-  localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
   localStorage.setItem("prestigePoints", prestigePoints);
+  localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
 }
 
 function prestige() {
   if (cookies >= prestigeThreshold) {
-    prestigePoints++;
+    prestigePoints += 1;
     clickPower = Math.floor(clickPower * prestigeBonus);
     cookies = 0;
     cookiesPerSecond = 0;
+    localStorage.setItem("cookies", cookies);
+    localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
     localStorage.setItem("prestigePoints", prestigePoints);
-    alert(`Prestige aktiviert! Du hast jetzt ${prestigePoints} Prestige.`);
+    alert(`Prestige erreicht! Du hast jetzt ${prestigePoints} Prestige-Punkte.`);
     updateDisplay();
-    renderShop();
   } else {
-    alert("Du brauchst mehr Cookies für Prestige.");
-  }
-}
-
-function renderShop() {
-  const clickDiv = document.getElementById("click-upgrades");
-  clickDiv.innerHTML = "";
-  clickUpgrades.forEach((upg, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.increase}/Click)`;
-    btn.onclick = () => buyClickUpgrade(i);
-    clickDiv.appendChild(btn);
-  });
-
-  const autoDiv = document.getElementById("auto-upgrades");
-  autoDiv.innerHTML = "";
-  autoUpgrades.forEach((upg, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.cpsIncrease}/Sek)`;
-    btn.onclick = () => buyAutoUpgrade(i);
-    autoDiv.appendChild(btn);
-  });
-
-  const prestigeDiv = document.getElementById("prestige-upgrades");
-  prestigeDiv.innerHTML = "";
-  prestigeUpgrades.forEach((upg, i) => {
-    if (prestigePoints >= upg.requiredPrestige) {
-      const btn = document.createElement("button");
-      btn.classList.add("prestige-only");
-      btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.increase} ${upg.type === "click" ? "/Click" : "/Sek"})`;
-      btn.onclick = () => buyPrestigeUpgrade(i);
-      prestigeDiv.appendChild(btn);
-    }
-  });
-}
-
-function buyClickUpgrade(i) {
-  const upg = clickUpgrades[i];
-  if (cookies >= upg.price) {
-    cookies -= upg.price;
-    clickPower += upg.increase;
-    updateDisplay();
-  }
-}
-
-function buyAutoUpgrade(i) {
-  const upg = autoUpgrades[i];
-  if (cookies >= upg.price) {
-    cookies -= upg.price;
-    cookiesPerSecond += upg.cpsIncrease;
-    updateDisplay();
-  }
-}
-
-function buyPrestigeUpgrade(i) {
-  const upg = prestigeUpgrades[i];
-  if (cookies >= upg.price) {
-    cookies -= upg.price;
-    if (upg.type === "click") clickPower += upg.increase;
-    else cookiesPerSecond += upg.increase;
-    updateDisplay();
+    alert("Du hast noch nicht genug Cookies für Prestige!");
   }
 }
 
@@ -134,14 +80,13 @@ document.getElementById("prestige-button").onclick = prestige;
 
 document.getElementById("reset-button").onclick = () => {
   if (confirm("Wirklich zurücksetzen?")) {
-    if (confirm("Ganz sicher?")) {
+    if (confirm("Bist du dir GANZ sicher?")) {
       localStorage.clear();
       cookies = 0;
       clickPower = 1;
-      cookiesPerSecond = 0;
       prestigePoints = 0;
+      cookiesPerSecond = 0;
       updateDisplay();
-      renderShop();
     }
   }
 };
@@ -149,17 +94,100 @@ document.getElementById("reset-button").onclick = () => {
 document.getElementById("btn-shop").onclick = () => {
   document.getElementById("game-view").classList.add("hidden");
   document.getElementById("shop-view").classList.remove("hidden");
+  document.getElementById("btn-shop").classList.add("hidden");
+  document.getElementById("btn-game").classList.remove("hidden");
 };
 
 document.getElementById("btn-game").onclick = () => {
   document.getElementById("shop-view").classList.add("hidden");
   document.getElementById("game-view").classList.remove("hidden");
+  document.getElementById("btn-shop").classList.remove("hidden");
+  document.getElementById("btn-game").classList.add("hidden");
 };
 
+function renderShop() {
+  const clickUpgradeDiv = document.getElementById("click-upgrades");
+  clickUpgradeDiv.innerHTML = '';
+  clickUpgrades.forEach((upgrade, index) => {
+    const button = document.createElement("button");
+    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) [+${upgrade.increase}/Click]`;
+    button.onclick = () => buyClickUpgrade(index);
+    clickUpgradeDiv.appendChild(button);
+  });
+
+  const autoUpgradeDiv = document.getElementById("auto-upgrades");
+  autoUpgradeDiv.innerHTML = '';
+  autoUpgrades.forEach((upgrade, index) => {
+    const button = document.createElement("button");
+    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) [+${upgrade.cpsIncrease}/Sek]`;
+    button.onclick = () => buyAutoUpgrade(index);
+    autoUpgradeDiv.appendChild(button);
+  });
+
+  const prestigeUpgradeDiv = document.getElementById("prestige-upgrades");
+  prestigeUpgradeDiv.innerHTML = '';
+  if (prestigePoints >= 1) {
+    prestigeUpgrades.forEach((upgrade, index) => {
+      const button = document.createElement("button");
+      button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price})`;
+      if (upgrade.clickPowerIncrease) {
+        button.textContent += ` [+${upgrade.clickPowerIncrease}/Click]`;
+      } else if (upgrade.cpsIncrease) {
+        button.textContent += ` [+${upgrade.cpsIncrease}/Sek]`;
+      }
+      button.onclick = () => buyPrestigeUpgrade(index);
+      button.classList.add("prestige-only");
+      prestigeUpgradeDiv.appendChild(button);
+    });
+  }
+}
+
+function buyClickUpgrade(index) {
+  const upgrade = clickUpgrades[index];
+  if (cookies >= upgrade.price) {
+    cookies -= upgrade.price;
+    clickPower += upgrade.increase;
+    updateDisplay();
+    renderShop();
+  } else {
+    alert("Nicht genug Cookies!");
+  }
+}
+
+function buyAutoUpgrade(index) {
+  const upgrade = autoUpgrades[index];
+  if (cookies >= upgrade.price) {
+    cookies -= upgrade.price;
+    cookiesPerSecond += upgrade.cpsIncrease;
+    updateDisplay();
+    renderShop();
+  } else {
+    alert("Nicht genug Cookies!");
+  }
+}
+
+function buyPrestigeUpgrade(index) {
+  const upgrade = prestigeUpgrades[index];
+  if (cookies >= upgrade.price) {
+    cookies -= upgrade.price;
+    if (upgrade.clickPowerIncrease) {
+      clickPower += upgrade.clickPowerIncrease;
+    } else if (upgrade.cpsIncrease) {
+      cookiesPerSecond += upgrade.cpsIncrease;
+    }
+    updateDisplay();
+    renderShop();
+  } else {
+    alert("Nicht genug Cookies!");
+  }
+}
+
+// Auto-Cookies pro Sekunde hinzufügen
 setInterval(() => {
   cookies += cookiesPerSecond;
   updateDisplay();
 }, 1000);
 
+// Initialer Aufruf
 renderShop();
 updateDisplay();
