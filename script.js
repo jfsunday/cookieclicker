@@ -1,161 +1,165 @@
-// Spiel-Variablen
+// Cookie Clicker Script mit Prestige, Upgrades und Auto-Cookies
 let cookies = parseInt(localStorage.getItem("cookies")) || 0;
 let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
-let cps = parseInt(localStorage.getItem("cps")) || 0;
 let prestigePoints = parseInt(localStorage.getItem("prestigePoints")) || 0;
-let prestigeThreshold = 1000000; // 1 Million Cookies für Prestige
-let prestigeBonus = 1 + prestigePoints * 0.1; // 10% Bonus pro Prestige-Punkt
+let cookiesPerSecond = parseFloat(localStorage.getItem("cookiesPerSecond")) || 0;
 
+const prestigeThreshold = 1000000;
 const cookieCount = document.getElementById("cookie-count");
 const clickPowerInfo = document.getElementById("clickpower-info");
-const prestigeStatus = document.getElementById("prestige-status");
+const prestigeInfo = document.getElementById("prestige-info");
 const cookieImg = document.getElementById("cookie");
 const clickSound = document.getElementById("click-sound");
-const achievementBox = document.getElementById("achievement");
 
-// Klick-Upgrades Shop
+let prestigeBonus = 1 + prestigePoints * 0.1;
+
 const clickUpgrades = [
-  { name: "Klickstärke Level 1", price: 50, increase: 1 },
-  { name: "Klickstärke Level 2", price: 200, increase: 2 },
-  { name: "Klickstärke Level 3", price: 500, increase: 3 },
-  { name: "Klickstärke Level 4", price: 1000, increase: 4 },
+  { name: "Klickstufe 1", price: 50, increase: 1 },
+  { name: "Klickstufe 2", price: 200, increase: 2 },
+  { name: "Klickstufe 3", price: 500, increase: 3 },
+  { name: "Klickstufe 4", price: 1000, increase: 4 },
+  { name: "Klickstufe 5", price: 2000, increase: 6 }
 ];
 
-// Passive-Upgrades Shop (CPS)
 const autoUpgrades = [
-  { name: "Keks-Fabrik", price: 1000, cpsIncrease: 0.5 },
-  { name: "Keks-Mine", price: 5000, cpsIncrease: 1 },
-  { name: "Keks-Planet", price: 10000, cpsIncrease: 2 },
+  { name: "Keks-Fabrik", price: 200, cpsIncrease: 0.5 },
+  { name: "Keks-Mine", price: 1000, cpsIncrease: 1 },
+  { name: "Keks-Planet", price: 2000, cpsIncrease: 2 },
+  { name: "Mondbäcker", price: 4000, cpsIncrease: 4 },
+  { name: "Sternensnack", price: 8000, cpsIncrease: 6 },
+  { name: "Milchstraße-Prozessor", price: 15000, cpsIncrease: 10 }
 ];
 
-function showAchievement(text) {
-  achievementBox.textContent = text;
-  achievementBox.classList.remove("hidden");
-  setTimeout(() => achievementBox.classList.add("hidden"), 3000);
-}
+const prestigeUpgrades = [
+  { name: "Goldene Hände", price: 5000, type: "click", increase: 2, requiredPrestige: 1 },
+  { name: "Himmlisches Backwerk", price: 10000, type: "cps", increase: 5, requiredPrestige: 1 },
+  { name: "Keks-Gottheit", price: 20000, type: "cps", increase: 10, requiredPrestige: 2 }
+];
 
 function updateDisplay() {
-  cookieCount.textContent = `Cookies: ${cookies}`;
-  clickPowerInfo.textContent = `Klickstärke: ${clickPower}`;
-  prestigeStatus.textContent = prestigePoints;
+  cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
+  clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond.toFixed(1)}`;
+  prestigeInfo.textContent = cookies >= prestigeThreshold
+    ? `Du kannst Prestige aktivieren!`
+    : `Prestige ab: ${prestigeThreshold} (Fehlen: ${prestigeThreshold - cookies})`;
+
   localStorage.setItem("cookies", cookies);
   localStorage.setItem("clickPower", clickPower);
-  localStorage.setItem("cps", cps);
+  localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
   localStorage.setItem("prestigePoints", prestigePoints);
-  renderShop(); // Shop nach jedem Update neu rendern
 }
 
 function prestige() {
   if (cookies >= prestigeThreshold) {
-    prestigePoints += 1;
-    localStorage.setItem("prestigePoints", prestigePoints);
+    prestigePoints++;
     clickPower = Math.floor(clickPower * prestigeBonus);
-    cps = Math.floor(cps * prestigeBonus);
     cookies = 0;
-    localStorage.setItem("cookies", cookies);
-    showAchievement(`Prestige erreicht! Du hast jetzt ${prestigePoints} Prestige-Punkte.`);
+    cookiesPerSecond = 0;
+    localStorage.setItem("prestigePoints", prestigePoints);
+    alert(`Prestige aktiviert! Du hast jetzt ${prestigePoints} Prestige.`);
     updateDisplay();
+    renderShop();
   } else {
-    alert("Du hast noch nicht genug Cookies für Prestige!");
+    alert("Du brauchst mehr Cookies für Prestige.");
   }
 }
 
 function renderShop() {
-  // Klick-Upgrades anzeigen
-  const clickUpgradeDiv = document.getElementById("click-upgrades");
-  clickUpgradeDiv.innerHTML = ''; // Vorherige Upgrades entfernen
-  clickUpgrades.forEach((upgrade, index) => {
-    const button = document.createElement("button");
-    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price} Cookies)`;
-    button.onclick = () => buyMultipleClickUpgrades(index);
-    clickUpgradeDiv.appendChild(button);
+  const clickDiv = document.getElementById("click-upgrades");
+  clickDiv.innerHTML = "";
+  clickUpgrades.forEach((upg, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.increase}/Click)`;
+    btn.onclick = () => buyClickUpgrade(i);
+    clickDiv.appendChild(btn);
   });
 
-  // Auto-Upgrades anzeigen
-  const autoUpgradeDiv = document.getElementById("auto-upgrades");
-  autoUpgradeDiv.innerHTML = ''; // Vorherige Upgrades entfernen
-  autoUpgrades.forEach((upgrade, index) => {
-    const button = document.createElement("button");
-    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price} Cookies)`;
-    button.onclick = () => buyMultipleAutoUpgrades(index);
-    autoUpgradeDiv.appendChild(button);
+  const autoDiv = document.getElementById("auto-upgrades");
+  autoDiv.innerHTML = "";
+  autoUpgrades.forEach((upg, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.cpsIncrease}/Sek)`;
+    btn.onclick = () => buyAutoUpgrade(i);
+    autoDiv.appendChild(btn);
+  });
+
+  const prestigeDiv = document.getElementById("prestige-upgrades");
+  prestigeDiv.innerHTML = "";
+  prestigeUpgrades.forEach((upg, i) => {
+    if (prestigePoints >= upg.requiredPrestige) {
+      const btn = document.createElement("button");
+      btn.classList.add("prestige-only");
+      btn.textContent = `${upg.name} (${upg.price} Cookies, +${upg.increase} ${upg.type === "click" ? "/Click" : "/Sek"})`;
+      btn.onclick = () => buyPrestigeUpgrade(i);
+      prestigeDiv.appendChild(btn);
+    }
   });
 }
 
-function buyMultipleClickUpgrades(index) {
-  const upgrade = clickUpgrades[index];
-  const levels = prompt("Wie viele Level möchtest du kaufen? (Max: 10)");
-  if (levels !== null && !isNaN(levels) && levels > 0 && levels <= 10) {
-    const totalPrice = upgrade.price * levels;
-    if (cookies >= totalPrice) {
-      cookies -= totalPrice;
-      clickPower += upgrade.increase * levels;
-      showAchievement(`Du hast ${levels} Level ${upgrade.name} gekauft!`);
-      updateDisplay();
-    } else {
-      alert("Nicht genug Cookies!");
-    }
-  } else {
-    alert("Ungültige Anzahl!");
+function buyClickUpgrade(i) {
+  const upg = clickUpgrades[i];
+  if (cookies >= upg.price) {
+    cookies -= upg.price;
+    clickPower += upg.increase;
+    updateDisplay();
   }
 }
 
-function buyMultipleAutoUpgrades(index) {
-  const upgrade = autoUpgrades[index];
-  const levels = prompt("Wie viele Level möchtest du kaufen? (Max: 10)");
-  if (levels !== null && !isNaN(levels) && levels > 0 && levels <= 10) {
-    const totalPrice = upgrade.price * levels;
-    if (cookies >= totalPrice) {
-      cookies -= totalPrice;
-      cps += upgrade.cpsIncrease * levels;
-      showAchievement(`Du hast ${levels} Level ${upgrade.name} gekauft!`);
-      updateDisplay();
-    } else {
-      alert("Nicht genug Cookies!");
-    }
-  } else {
-    alert("Ungültige Anzahl!");
+function buyAutoUpgrade(i) {
+  const upg = autoUpgrades[i];
+  if (cookies >= upg.price) {
+    cookies -= upg.price;
+    cookiesPerSecond += upg.cpsIncrease;
+    updateDisplay();
   }
 }
 
-// Klick auf Cookie für Cookies sammeln
+function buyPrestigeUpgrade(i) {
+  const upg = prestigeUpgrades[i];
+  if (cookies >= upg.price) {
+    cookies -= upg.price;
+    if (upg.type === "click") clickPower += upg.increase;
+    else cookiesPerSecond += upg.increase;
+    updateDisplay();
+  }
+}
+
 cookieImg.onclick = () => {
   cookies += clickPower;
   clickSound.play();
   updateDisplay();
 };
 
-// Reset-Button
+document.getElementById("prestige-button").onclick = prestige;
+
 document.getElementById("reset-button").onclick = () => {
-  if (confirm("Möchtest du wirklich deinen Spielstand zurücksetzen?")) {
-    cookies = 0;
-    clickPower = 1;
-    cps = 0;
-    prestigePoints = 0;
-    localStorage.clear();
-    updateDisplay();
+  if (confirm("Wirklich zurücksetzen?")) {
+    if (confirm("Ganz sicher?")) {
+      localStorage.clear();
+      cookies = 0;
+      clickPower = 1;
+      cookiesPerSecond = 0;
+      prestigePoints = 0;
+      updateDisplay();
+      renderShop();
+    }
   }
 };
 
-// Prestige-Button
-document.getElementById("prestige-button").onclick = prestige;
+document.getElementById("btn-shop").onclick = () => {
+  document.getElementById("game-view").classList.add("hidden");
+  document.getElementById("shop-view").classList.remove("hidden");
+};
 
-function switchView(viewName) {
-  const gameView = document.getElementById("game-view");
-  const shopView = document.getElementById("shop-view");
+document.getElementById("btn-game").onclick = () => {
+  document.getElementById("shop-view").classList.add("hidden");
+  document.getElementById("game-view").classList.remove("hidden");
+};
 
-  if (viewName === "game") {
-    gameView.classList.remove("hidden");
-    shopView.classList.add("hidden");
-  } else if (viewName === "shop") {
-    gameView.classList.add("hidden");
-    shopView.classList.remove("hidden");
-  }
-}
+setInterval(() => {
+  cookies += cookiesPerSecond;
+  updateDisplay();
+}, 1000);
 
-// Navigation zwischen Spiel und Shop
-document.getElementById("btn-game").onclick = () => switchView("game");
-document.getElementById("btn-shop").onclick = () => switchView("shop");
-
-renderShop(); // Initiale Shop-Darstellung
-updateDisplay(); // Initiale Anzeige aktualisieren
+renderShop();
+updateDisplay();
