@@ -27,6 +27,15 @@ const autoUpgrades = [
 function updateDisplay() {
   cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
   clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond}`;
+
+  const prestigeInfo = document.getElementById("prestige-info");
+  if (cookies >= prestigeThreshold) {
+    prestigeInfo.textContent = `Du kannst Prestige aktivieren!`;
+  } else {
+    const fehlend = prestigeThreshold - cookies;
+    prestigeInfo.textContent = `Prestige ab: ${prestigeThreshold.toLocaleString()} Cookies (Fehlen noch: ${Math.floor(fehlend).toLocaleString()})`;
+  }
+
   localStorage.setItem("cookies", cookies);
   localStorage.setItem("clickPower", clickPower);
   localStorage.setItem("prestigePoints", prestigePoints);
@@ -89,7 +98,7 @@ function renderShop() {
   clickUpgradeDiv.innerHTML = '';
   clickUpgrades.forEach((upgrade, index) => {
     const button = document.createElement("button");
-    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) (+${upgrade.increase}/Click)`;
+    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) [+${upgrade.increase}/Click]`;
     button.onclick = () => buyClickUpgrade(index);
     clickUpgradeDiv.appendChild(button);
   });
