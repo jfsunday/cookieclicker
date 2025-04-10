@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cookie Clicker Testseite</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1-1/crypto-js.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -45,7 +46,13 @@
 <body>
   <div class="container">
     <h2>Cookie Clicker Testseite</h2>
-    
+
+    <!-- Eingabefeld für geheimen Schlüssel -->
+    <div class="form-group">
+      <label for="secretKey">Geheimer Schlüssel:</label>
+      <input type="text" id="secretKey" placeholder="Gib einen geheimen Schlüssel ein">
+    </div>
+
     <!-- Spiel Werte Eingabe -->
     <div class="form-group">
       <label for="cookies">Cookies:</label>
