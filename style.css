@@ -73,3 +73,17 @@ h1, h2, h3 {
 .prestige-only:hover {
   background-color: #b84dff;
 }
+.hidden {
+  display: none;
+}
+
+#export-box, #import-box {
+  margin: 20px;
+  padding: 10px;
+  background: #eee;
+  border-radius: 8px;
+}
+textarea {
+  width: 90%;
+  max-width: 600px;
+}
