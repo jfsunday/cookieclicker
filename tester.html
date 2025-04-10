@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Cookie Clicker Code Generator</title>
+  <title>Cookie Clicker Testcode Generator</title>
   <style>
     body {
       font-family: sans-serif;
@@ -58,44 +58,47 @@
   </div>
 
   <script>
+    // Funktion: Text in Binär umwandeln
     function textToBinary(text) {
       return text.split('').map(char =>
         char.charCodeAt(0).toString(2).padStart(8, '0')
       ).join(' ');
     }
 
+    // Funktion: Binär in Text umwandeln
     function binaryToText(binary) {
       return binary.split(' ').map(bin =>
         String.fromCharCode(parseInt(bin, 2))
       ).join('');
     }
 
+    // Funktion: Binär-Code erzeugen
     function generateCode() {
-      // Holen der Werte von den Eingabefeldern
       const saveData = {
         cookies: parseInt(document.getElementById("input-cookies").value) || 0,
         clickPower: parseInt(document.getElementById("input-clickPower").value) || 1,
         cps: parseInt(document.getElementById("input-cps").value) || 0,
         prestigeLevel: parseInt(document.getElementById("input-prestige").value) || 0
       };
-
-      // Umwandeln der Daten in JSON
+      
+      // Umwandlung in JSON-String
       const json = JSON.stringify(saveData);
       
-      // Umwandeln des JSON in Binär
+      // Umwandlung des JSON-Strings in Binär
       const binary = textToBinary(json);
       
-      // Ausgabe des Binärcodes
+      // Ausgabe des Binärcodes im Textfeld
       document.getElementById("output-code").value = binary;
     }
 
+    // Funktion: Binär-Code entschlüsseln
     function decodeCode() {
       try {
-        // Den Binärcode aus der Eingabe holen und entschlüsseln
+        // Binärcode aus der Eingabe holen und in Text umwandeln
         const binary = document.getElementById("input-code").value.trim();
         const text = binaryToText(binary);
         
-        // Überprüfen, ob es gültiges JSON ist
+        // Überprüfung, ob der Text gültiges JSON ist
         const parsed = JSON.parse(text);
         
         // Den entschlüsselten Spielstand anzeigen
