@@ -23,12 +23,14 @@ function binaryToText(binary) {
 function saveGame() {
   const cookies = document.getElementById("cookies").value;
   const cps = document.getElementById("cps").value;
+  const clickStrength = document.getElementById("clickStrength").value;
   const upgrades = document.getElementById("upgrades").value;
   const prestige = document.getElementById("prestige").value;
   
   const gameData = {
     cookies: cookies,
     cps: cps,
+    clickStrength: clickStrength,
     upgrades: upgrades,
     prestige: prestige
   };
