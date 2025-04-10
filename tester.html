@@ -65,31 +65,44 @@
     }
 
     function binaryToText(binary) {
-      return binary.trim().split(' ').map(bin =>
+      return binary.split(' ').map(bin =>
         String.fromCharCode(parseInt(bin, 2))
       ).join('');
     }
 
     function generateCode() {
+      // Holen der Werte von den Eingabefeldern
       const saveData = {
         cookies: parseInt(document.getElementById("input-cookies").value) || 0,
         clickPower: parseInt(document.getElementById("input-clickPower").value) || 1,
         cps: parseInt(document.getElementById("input-cps").value) || 0,
         prestigeLevel: parseInt(document.getElementById("input-prestige").value) || 0
       };
+
+      // Umwandeln der Daten in JSON
       const json = JSON.stringify(saveData);
+      
+      // Umwandeln des JSON in Binär
       const binary = textToBinary(json);
+      
+      // Ausgabe des Binärcodes
       document.getElementById("output-code").value = binary;
     }
 
     function decodeCode() {
       try {
+        // Den Binärcode aus der Eingabe holen und entschlüsseln
         const binary = document.getElementById("input-code").value.trim();
         const text = binaryToText(binary);
+        
+        // Überprüfen, ob es gültiges JSON ist
         const parsed = JSON.parse(text);
+        
+        // Den entschlüsselten Spielstand anzeigen
         document.getElementById("decoded-output").value = JSON.stringify(parsed, null, 2);
       } catch (e) {
-        document.getElementById("decoded-output").value = "Ungültiger Binärcode!";
+        // Fehlerbehandlung bei ungültigem Binärcode
+        document.getElementById("decoded-output").value = "Ungültiger Binär-Code!";
       }
     }
   </script>
