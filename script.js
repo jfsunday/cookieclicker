@@ -4,7 +4,6 @@ let cookiesPerSecond = 0;
 let prestigePoints = 0;
 let upgrades = { click: {}, auto: {}, prestige: {} };
 let bonusActive = false;
-let bonusTimeout;
 
 const clickSound = document.getElementById("click-sound");
 const cookieImg = document.getElementById("cookie");
@@ -24,7 +23,6 @@ const btnShop = document.getElementById("btn-shop");
 const btnPrestige = document.getElementById("prestige-button");
 const btnReset = document.getElementById("reset-button");
 
-// === UPGRADE-DATEN ===
 const upgradeData = {
   click: [
     { name: "Starker Finger", price: 10, power: 1 },
@@ -46,12 +44,10 @@ const upgradeData = {
   ]
 };
 
-// === COOKIE CLICK ===
 cookieImg.onclick = () => {
   cookies += clickPower;
   clickSound.play();
 
-  // Bonuschance: 1 %
   if (!bonusActive && Math.random() < 0.01) {
     activateBonus();
   }
@@ -60,7 +56,6 @@ cookieImg.onclick = () => {
   saveGame();
 };
 
-// === ZUFALLSBONUS ===
 function activateBonus() {
   bonusActive = true;
 
@@ -71,7 +66,7 @@ function activateBonus() {
   cookiesPerSecond = cookiesPerSecond * 1.1;
 
   const bonusMsg = document.createElement("div");
-  bonusMsg.textContent = "🍀 Bonus aktiviert! +10 % CPS & Klickstärke für 60s!";
+  bonusMsg.textContent = "🍀 Bonus! +10% CPS & Klickstärke für 60s!";
   bonusMsg.style.position = "fixed";
   bonusMsg.style.top = "20px";
   bonusMsg.style.left = "50%";
@@ -88,22 +83,20 @@ function activateBonus() {
     document.body.removeChild(bonusMsg);
   }, 4000);
 
-  bonusTimeout = setTimeout(() => {
+  setTimeout(() => {
     clickPower = oldClickPower;
     cookiesPerSecond = oldCPS;
     bonusActive = false;
     updateDisplay();
-  }, 60000); // 60 Sekunden
+  }, 60000);
 }
 
-// === AUTO CPS TICK ===
 setInterval(() => {
   cookies += cookiesPerSecond;
   updateDisplay();
   saveGame();
 }, 1000);
 
-// === UPDATE DISPLAY ===
 function updateDisplay() {
   cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
   clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond.toFixed(1)}`;
@@ -111,7 +104,6 @@ function updateDisplay() {
   renderUpgrades();
 }
 
-// === KAUF-FUNKTION ===
 function buyUpgrade(type, index) {
   const item = upgradeData[type][index];
   const key = item.name;
@@ -119,19 +111,16 @@ function buyUpgrade(type, index) {
   if (type === "prestige") {
     if (prestigePoints >= item.price) {
       prestigePoints -= item.price;
-      if (!upgrades[type][key]) upgrades[type][key] = 0;
-      upgrades[type][key]++;
+      upgrades[type][key] = (upgrades[type][key] || 0) + 1;
       if (item.power) clickPower += item.power;
       if (item.cps) cookiesPerSecond += item.cps;
     }
   } else {
     if (cookies >= item.price || upgrades[type][key]) {
-      if (!upgrades[type][key]) upgrades[type][key] = 0;
-      upgrades[type][key]++;
       cookies -= item.price;
-
-      if (type === "click") clickPower += item.power;
-      if (type === "auto") cookiesPerSecond += item.cps;
+      upgrades[type][key] = (upgrades[type][key] || 0) + 1;
+      if (item.power) clickPower += item.power;
+      if (item.cps) cookiesPerSecond += item.cps;
     }
   }
 
@@ -139,7 +128,6 @@ function buyUpgrade(type, index) {
   saveGame();
 }
 
-// === RENDER-UPGRADES ===
 function renderUpgrades() {
   ["click", "auto", "prestige"].forEach(type => {
     const container =
@@ -156,7 +144,7 @@ function renderUpgrades() {
 
       if (shouldShow) {
         const btn = document.createElement("button");
-        btn.textContent = `${item.name} (${type === "prestige" ? item.price + " PP" : item.price} Cookies) x${owned}`;
+        btn.textContent = `${item.name} (${type === "prestige" ? item.price + " PP" : item.price}) x${owned}`;
         if (item.power) btn.textContent += ` [+${item.power} Klick]`;
         if (item.cps) btn.textContent += ` [+${item.cps} CPS]`;
         btn.onclick = () => buyUpgrade(type, index);
@@ -166,7 +154,6 @@ function renderUpgrades() {
   });
 }
 
-// === PRESTIGE ===
 function prestige() {
   if (cookies >= 1000000) {
     const bonus = Math.floor(cookies / 1000000);
@@ -177,11 +164,10 @@ function prestige() {
     upgrades = { click: {}, auto: {}, prestige: upgrades.prestige };
     saveGame();
     updateDisplay();
-    alert(`Prestige aktiviert! Du hast ${bonus} Prestige-Punkt(e) erhalten.`);
+    alert(`Prestige! Du hast ${bonus} Punkt(e) erhalten.`);
   }
 }
 
-// === RESET ===
 function resetGame() {
   if (confirm("Willst du wirklich alles zurücksetzen?")) {
     if (confirm("Ganz sicher? Das kann nicht rückgängig gemacht werden!")) {
@@ -191,7 +177,6 @@ function resetGame() {
   }
 }
 
-// === SPEICHERN / LADEN ===
 function saveGame() {
   const save = {
     cookies,
@@ -215,11 +200,9 @@ function loadGame() {
   }
 }
 
-// === INIT ===
 loadGame();
 updateDisplay();
 
-// === NAVIGATION ===
 btnGame.onclick = () => {
   gameView.classList.remove("hidden");
   shopView.classList.add("hidden");
@@ -232,3 +215,36 @@ btnShop.onclick = () => {
 
 btnPrestige.onclick = prestige;
 btnReset.onclick = resetGame;
+
+// === EXPORT / IMPORT ===
+const btnExport = document.getElementById("export-button");
+const btnImport = document.getElementById("import-button");
+const exportBox = document.getElementById("export-box");
+const exportOutput = document.getElementById("export-output");
+const importBox = document.getElementById("import-box");
+const importInput = document.getElementById("import-input");
+const importConfirm = document.getElementById("import-confirm");
+
+btnExport.onclick = () => {
+  const save = localStorage.getItem("cookieClickerSave");
+  const encoded = btoa(save);
+  exportOutput.value = encoded;
+  exportBox.classList.remove("hidden");
+  importBox.classList.add("hidden");
+};
+
+btnImport.onclick = () => {
+  importBox.classList.remove("hidden");
+  exportBox.classList.add("hidden");
+};
+
+importConfirm.onclick = () => {
+  try {
+    const decoded = atob(importInput.value.trim());
+    localStorage.setItem("cookieClickerSave", decoded);
+    alert("Import erfolgreich! Spiel wird neu geladen.");
+    location.reload();
+  } catch (e) {
+    alert("Ungültiger Code!");
+  }
+};
