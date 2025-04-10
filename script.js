@@ -169,13 +169,23 @@ function prestige() {
 }
 
 function resetGame() {
-  if (confirm("Willst du wirklich alles zurücksetzen?")) {
-    if (confirm("Ganz sicher? Das kann nicht rückgängig gemacht werden!")) {
-      localStorage.removeItem("cookieClickerSave");
-      location.reload();
-    }
-  }
+  // Alle Variablen zurücksetzen
+  cookies = 0;
+  clickPower = 1;
+  cps = 0;
+  prestigeLevel = 0;
+  
+  // Anzeigen zurücksetzen
+  document.getElementById("cookie-count").textContent = `Cookies: ${cookies}`;
+  document.getElementById("clickpower-info").textContent = `Klickstärke: ${clickPower} | CPS: ${cps}`;
+  document.getElementById("prestige-info").textContent = `Prestige ab: 1000000`;
+  
+  // Falls es Upgrades gibt, zurücksetzen
+  // Hier kannst du alle Upgrades zurücksetzen, je nachdem, wie du sie gespeichert hast
+  
+  alert("Das Spiel wurde zurückgesetzt!");
 }
+
 
 function saveGame() {
   const save = {
