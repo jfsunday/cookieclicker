@@ -216,10 +216,7 @@ btnShop.onclick = () => {
 btnPrestige.onclick = prestige;
 btnReset.onclick = resetGame;
 
-// ... dein kompletter Spielcode bleibt unverändert ...
-// hier geht's direkt weiter mit dem Export/Import-Bereich
-
-// === EXPORT / IMPORT (Base64-verschlüsselt) ===
+// === EXPORT / IMPORT (Binärcode) ===
 const btnExport = document.getElementById("export-button");
 const btnImport = document.getElementById("import-button");
 const exportBox = document.getElementById("export-box");
@@ -228,10 +225,22 @@ const importBox = document.getElementById("import-box");
 const importInput = document.getElementById("import-input");
 const importConfirm = document.getElementById("import-confirm");
 
+function textToBinary(text) {
+  return text.split('').map(char =>
+    char.charCodeAt(0).toString(2).padStart(8, '0')
+  ).join(' ');
+}
+
+function binaryToText(binary) {
+  return binary.split(' ').map(bin =>
+    String.fromCharCode(parseInt(bin, 2))
+  ).join('');
+}
+
 btnExport.onclick = () => {
   const save = localStorage.getItem("cookieClickerSave");
-  const encoded = btoa(save); // verschlüsseln (Base64)
-  exportOutput.value = encoded;
+  const binary = textToBinary(save);
+  exportOutput.value = binary;
   exportBox.classList.remove("hidden");
   importBox.classList.add("hidden");
 };
@@ -243,12 +252,13 @@ btnImport.onclick = () => {
 
 importConfirm.onclick = () => {
   try {
-    const decoded = atob(importInput.value.trim()); // entschlüsseln (Base64)
-    JSON.parse(decoded); // prüfen ob es gültig ist
-    localStorage.setItem("cookieClickerSave", decoded);
+    const binText = importInput.value.trim();
+    const json = binaryToText(binText);
+    JSON.parse(json); // Validierung
+    localStorage.setItem("cookieClickerSave", json);
     alert("Import erfolgreich! Spiel wird neu geladen.");
     location.reload();
   } catch (e) {
-    alert("Ungültiger Code!");
+    alert("Ungültiger Binär-Code!");
   }
 };
