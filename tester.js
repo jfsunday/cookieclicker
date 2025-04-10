@@ -7,6 +7,7 @@ const importBox = document.getElementById("import-box");
 const importInput = document.getElementById("import-input");
 const importConfirm = document.getElementById("import-confirm");
 const saveButton = document.getElementById("save-button");
+const secretKeyInput = document.getElementById("secretKey");
 
 // Funktion zum Umwandeln von Text in Binär
 function textToBinary(text) {
@@ -22,21 +23,42 @@ function binaryToText(binary) {
   ).join('');
 }
 
+// Funktion zur AES-Verschlüsselung
+function encryptText(text, secretKey) {
+  return CryptoJS.AES.encrypt(text, secretKey).toString();
+}
+
+// Funktion zur AES-Entschlüsselung
+function decryptText(encryptedText, secretKey) {
+  const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
+
 // Funktion zum Speichern des Spiels
 function saveGame() {
-  // Hier definierst du die Werte, die in JSON gespeichert werden
+  // Den geheimen Schlüssel aus dem Eingabefeld holen
+  const secretKey = secretKeyInput.value.trim();
+  if (!secretKey) {
+    alert("Bitte gib einen geheimen Schlüssel ein.");
+    return;
+  }
+
+  // Beispiel für Spielwerte
   const gameData = {
-    cookies: 1000000, // Beispielwert
-    clickPower: 50,   // Beispielwert
-    cps: 500,         // Beispielwert
-    prestigeLevel: 3  // Beispielwert
+    cookies: 1000000,
+    clickPower: 50,
+    cps: 500,
+    prestigeLevel: 3
   };
 
   // Den JSON-String erzeugen
   const gameDataJSON = JSON.stringify(gameData);
 
-  // Den JSON-String in Binärform umwandeln
-  const binaryData = textToBinary(gameDataJSON);
+  // Verschlüsseln der JSON-Daten mit dem Benutzer-Schlüssel
+  const encryptedData = encryptText(gameDataJSON, secretKey);
+
+  // Den verschlüsselten Text in Binär umwandeln
+  const binaryData = textToBinary(encryptedData);
 
   // Speichern der Binärdaten im LocalStorage
   localStorage.setItem("cookieClickerSave", binaryData);
@@ -66,17 +88,27 @@ btnImport.onclick = () => {
 importConfirm.onclick = () => {
   try {
     const binText = importInput.value.trim();
-    const json = binaryToText(binText); // Binärdaten in Text umwandeln
+    const encryptedText = binaryToText(binText);  // Binärdaten in verschlüsselten Text umwandeln
 
-    // Prüfen, ob der JSON-Text gültig ist
-    const parsedData = JSON.parse(json);
+    // Den geheimen Schlüssel aus dem Eingabefeld holen
+    const secretKey = secretKeyInput.value.trim();
+    if (!secretKey) {
+      alert("Bitte gib den gleichen geheimen Schlüssel ein, um zu entschlüsseln.");
+      return;
+    }
+
+    // Entschlüsseln der Daten
+    const decryptedData = decryptText(encryptedText, secretKey);
+
+    // Den entschlüsselten JSON-String parsen
+    const parsedData = JSON.parse(decryptedData);
 
     // Das Spiel mit den importierten Daten neu setzen
     localStorage.setItem("cookieClickerSave", binText);
     alert("Import erfolgreich! Spiel wird neu geladen.");
     location.reload(); // Seite neu laden
   } catch (e) {
-    alert("Ungültiger Binär-Code!");
+    alert("Ungültiger Binär-Code oder falscher Schlüssel!");
   }
 };
 
