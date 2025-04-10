@@ -1,193 +1,234 @@
-let cookies = parseInt(localStorage.getItem("cookies")) || 0;
-let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
-let prestigePoints = parseInt(localStorage.getItem("prestigePoints")) || 0;
-let cookiesPerSecond = parseFloat(localStorage.getItem("cookiesPerSecond")) || 0;
+let cookies = 0;
+let clickPower = 1;
+let cookiesPerSecond = 0;
+let prestigePoints = 0;
+let upgrades = { click: {}, auto: {}, prestige: {} };
+let bonusActive = false;
+let bonusTimeout;
 
+const clickSound = document.getElementById("click-sound");
+const cookieImg = document.getElementById("cookie");
 const cookieCount = document.getElementById("cookie-count");
 const clickPowerInfo = document.getElementById("clickpower-info");
-const cookieImg = document.getElementById("cookie");
-const clickSound = document.getElementById("click-sound");
+const prestigeInfo = document.getElementById("prestige-info");
 
-const prestigeThreshold = 1000000;
-let prestigeBonus = 1 + prestigePoints * 0.1;
+const clickUpgradeList = document.getElementById("click-upgrades");
+const autoUpgradeList = document.getElementById("auto-upgrades");
+const prestigeUpgradeList = document.getElementById("prestige-upgrades");
 
-const clickUpgrades = [
-  { name: "Klickstärke Level 1", price: 50, increase: 1 },
-  { name: "Klickstärke Level 2", price: 200, increase: 2 },
-  { name: "Klickstärke Level 3", price: 500, increase: 3 },
-  { name: "Klickstärke Level 4", price: 1000, increase: 4 },
-];
+const gameView = document.getElementById("game-view");
+const shopView = document.getElementById("shop-view");
 
-const autoUpgrades = [
-  { name: "Keks-Fabrik", price: 200, cpsIncrease: 0.5 },
-  { name: "Keks-Mine", price: 1000, cpsIncrease: 1 },
-  { name: "Keks-Planet", price: 2000, cpsIncrease: 2 },
-  { name: "Mondbäcker", price: 4000, cpsIncrease: 4 },
-  { name: "Sternensnack", price: 8000, cpsIncrease: 6 },
-  { name: "Milchstraße-Proz.", price: 15000, cpsIncrease: 10 },
-];
+const btnGame = document.getElementById("btn-game");
+const btnShop = document.getElementById("btn-shop");
+const btnPrestige = document.getElementById("prestige-button");
+const btnReset = document.getElementById("reset-button");
 
-// Neue, günstige Prestige-Upgrades
-const prestigeUpgrades = [
-  { name: "Goldene Hände", price: 100, clickPowerIncrease: 2 },
-  { name: "Himmlisches Backwerk", price: 500, cpsIncrease: 5 },
-  { name: "Keks-Gottheit", price: 1000, cpsIncrease: 10 },
-  { name: "Universum Backen", price: 2000, clickPowerIncrease: 5 },
-  { name: "Unendliche Kekse", price: 5000, cpsIncrease: 20 },
-];
+// === UPGRADE-DATEN ===
+const upgradeData = {
+  click: [
+    { name: "Starker Finger", price: 10, power: 1 },
+    { name: "Goldfinger", price: 50, power: 5 },
+    { name: "Hyperklick", price: 200, power: 15 },
+    { name: "Klickbot", price: 1000, power: 50 }
+  ],
+  auto: [
+    { name: "Oma", price: 20, cps: 0.2 },
+    { name: "Keksfabrik", price: 100, cps: 1 },
+    { name: "Keksplanet", price: 500, cps: 5 },
+    { name: "Multiversum-Bäcker", price: 1500, cps: 10 }
+  ],
+  prestige: [
+    { name: "Klick-Gott", price: 2, power: 10 },
+    { name: "Keks-Sturm", price: 5, cps: 20 },
+    { name: "Finger-Fusion", price: 10, power: 50 },
+    { name: "CPS-Schmelze", price: 15, cps: 100 }
+  ]
+};
 
-function updateDisplay() {
-  cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
-  clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond}`;
-
-  const prestigeInfo = document.getElementById("prestige-info");
-  if (cookies >= prestigeThreshold) {
-    prestigeInfo.textContent = `Du kannst Prestige aktivieren!`;
-  } else {
-    const fehlend = prestigeThreshold - cookies;
-    prestigeInfo.textContent = `Prestige ab: ${prestigeThreshold.toLocaleString()} Cookies (Fehlen noch: ${Math.floor(fehlend).toLocaleString()})`;
-  }
-
-  localStorage.setItem("cookies", cookies);
-  localStorage.setItem("clickPower", clickPower);
-  localStorage.setItem("prestigePoints", prestigePoints);
-  localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
-}
-
-function prestige() {
-  if (cookies >= prestigeThreshold) {
-    prestigePoints += 1;
-    clickPower = Math.floor(clickPower * prestigeBonus);
-    cookies = 0;
-    cookiesPerSecond = 0;
-    localStorage.setItem("cookies", cookies);
-    localStorage.setItem("cookiesPerSecond", cookiesPerSecond);
-    localStorage.setItem("prestigePoints", prestigePoints);
-    alert(`Prestige erreicht! Du hast jetzt ${prestigePoints} Prestige-Punkte.`);
-    updateDisplay();
-  } else {
-    alert("Du hast noch nicht genug Cookies für Prestige!");
-  }
-}
-
+// === COOKIE CLICK ===
 cookieImg.onclick = () => {
   cookies += clickPower;
   clickSound.play();
+
+  // Bonuschance: 1 %
+  if (!bonusActive && Math.random() < 0.01) {
+    activateBonus();
+  }
+
   updateDisplay();
+  saveGame();
 };
 
-document.getElementById("prestige-button").onclick = prestige;
+// === ZUFALLSBONUS ===
+function activateBonus() {
+  bonusActive = true;
 
-document.getElementById("reset-button").onclick = () => {
-  if (confirm("Wirklich zurücksetzen?")) {
-    if (confirm("Bist du dir GANZ sicher?")) {
-      localStorage.clear();
-      cookies = 0;
-      clickPower = 1;
-      prestigePoints = 0;
-      cookiesPerSecond = 0;
-      updateDisplay();
-    }
-  }
-};
+  const oldClickPower = clickPower;
+  const oldCPS = cookiesPerSecond;
 
-document.getElementById("btn-shop").onclick = () => {
-  document.getElementById("game-view").classList.add("hidden");
-  document.getElementById("shop-view").classList.remove("hidden");
-  document.getElementById("btn-shop").classList.add("hidden");
-  document.getElementById("btn-game").classList.remove("hidden");
-};
+  clickPower = Math.round(clickPower * 1.1);
+  cookiesPerSecond = cookiesPerSecond * 1.1;
 
-document.getElementById("btn-game").onclick = () => {
-  document.getElementById("shop-view").classList.add("hidden");
-  document.getElementById("game-view").classList.remove("hidden");
-  document.getElementById("btn-shop").classList.remove("hidden");
-  document.getElementById("btn-game").classList.add("hidden");
-};
+  const bonusMsg = document.createElement("div");
+  bonusMsg.textContent = "🍀 Bonus aktiviert! +10 % CPS & Klickstärke für 60s!";
+  bonusMsg.style.position = "fixed";
+  bonusMsg.style.top = "20px";
+  bonusMsg.style.left = "50%";
+  bonusMsg.style.transform = "translateX(-50%)";
+  bonusMsg.style.backgroundColor = "#00cc66";
+  bonusMsg.style.color = "#fff";
+  bonusMsg.style.padding = "10px";
+  bonusMsg.style.borderRadius = "10px";
+  bonusMsg.style.fontWeight = "bold";
+  bonusMsg.style.zIndex = "1000";
+  document.body.appendChild(bonusMsg);
 
-function renderShop() {
-  const clickUpgradeDiv = document.getElementById("click-upgrades");
-  clickUpgradeDiv.innerHTML = '';
-  clickUpgrades.forEach((upgrade, index) => {
-    const button = document.createElement("button");
-    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) [+${upgrade.increase}/Click]`;
-    button.onclick = () => buyClickUpgrade(index);
-    clickUpgradeDiv.appendChild(button);
-  });
+  setTimeout(() => {
+    document.body.removeChild(bonusMsg);
+  }, 4000);
 
-  const autoUpgradeDiv = document.getElementById("auto-upgrades");
-  autoUpgradeDiv.innerHTML = '';
-  autoUpgrades.forEach((upgrade, index) => {
-    const button = document.createElement("button");
-    button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price}) [+${upgrade.cpsIncrease}/Sek]`;
-    button.onclick = () => buyAutoUpgrade(index);
-    autoUpgradeDiv.appendChild(button);
-  });
-
-  const prestigeUpgradeDiv = document.getElementById("prestige-upgrades");
-  prestigeUpgradeDiv.innerHTML = '';
-  if (prestigePoints >= 1) {
-    prestigeUpgrades.forEach((upgrade, index) => {
-      const button = document.createElement("button");
-      button.textContent = `Kaufen: ${upgrade.name} (Preis: ${upgrade.price})`;
-      if (upgrade.clickPowerIncrease) {
-        button.textContent += ` [+${upgrade.clickPowerIncrease}/Click]`;
-      } else if (upgrade.cpsIncrease) {
-        button.textContent += ` [+${upgrade.cpsIncrease}/Sek]`;
-      }
-      button.onclick = () => buyPrestigeUpgrade(index);
-      button.classList.add("prestige-only");
-      prestigeUpgradeDiv.appendChild(button);
-    });
-  }
-}
-
-function buyClickUpgrade(index) {
-  const upgrade = clickUpgrades[index];
-  if (cookies >= upgrade.price) {
-    cookies -= upgrade.price;
-    clickPower += upgrade.increase;
+  bonusTimeout = setTimeout(() => {
+    clickPower = oldClickPower;
+    cookiesPerSecond = oldCPS;
+    bonusActive = false;
     updateDisplay();
-    renderShop();
-  } else {
-    alert("Nicht genug Cookies!");
-  }
+  }, 60000); // 60 Sekunden
 }
 
-function buyAutoUpgrade(index) {
-  const upgrade = autoUpgrades[index];
-  if (cookies >= upgrade.price) {
-    cookies -= upgrade.price;
-    cookiesPerSecond += upgrade.cpsIncrease;
-    updateDisplay();
-    renderShop();
-  } else {
-    alert("Nicht genug Cookies!");
-  }
-}
-
-function buyPrestigeUpgrade(index) {
-  const upgrade = prestigeUpgrades[index];
-  if (cookies >= upgrade.price) {
-    cookies -= upgrade.price;
-    if (upgrade.clickPowerIncrease) {
-      clickPower += upgrade.clickPowerIncrease;
-    } else if (upgrade.cpsIncrease) {
-      cookiesPerSecond += upgrade.cpsIncrease;
-    }
-    updateDisplay();
-    renderShop();
-  } else {
-    alert("Nicht genug Cookies!");
-  }
-}
-
-// Auto-Cookies pro Sekunde hinzufügen
+// === AUTO CPS TICK ===
 setInterval(() => {
   cookies += cookiesPerSecond;
   updateDisplay();
+  saveGame();
 }, 1000);
 
-// Initialer Aufruf
-renderShop();
+// === UPDATE DISPLAY ===
+function updateDisplay() {
+  cookieCount.textContent = `Cookies: ${Math.floor(cookies)}`;
+  clickPowerInfo.textContent = `Klickstärke: ${clickPower} | CPS: ${cookiesPerSecond.toFixed(1)}`;
+  prestigeInfo.textContent = `Prestige ab: 1000000 | Punkte: ${prestigePoints}`;
+  renderUpgrades();
+}
+
+// === KAUF-FUNKTION ===
+function buyUpgrade(type, index) {
+  const item = upgradeData[type][index];
+  const key = item.name;
+
+  if (type === "prestige") {
+    if (prestigePoints >= item.price) {
+      prestigePoints -= item.price;
+      if (!upgrades[type][key]) upgrades[type][key] = 0;
+      upgrades[type][key]++;
+      if (item.power) clickPower += item.power;
+      if (item.cps) cookiesPerSecond += item.cps;
+    }
+  } else {
+    if (cookies >= item.price || upgrades[type][key]) {
+      if (!upgrades[type][key]) upgrades[type][key] = 0;
+      upgrades[type][key]++;
+      cookies -= item.price;
+
+      if (type === "click") clickPower += item.power;
+      if (type === "auto") cookiesPerSecond += item.cps;
+    }
+  }
+
+  updateDisplay();
+  saveGame();
+}
+
+// === RENDER-UPGRADES ===
+function renderUpgrades() {
+  ["click", "auto", "prestige"].forEach(type => {
+    const container =
+      type === "click" ? clickUpgradeList :
+      type === "auto" ? autoUpgradeList :
+      prestigeUpgradeList;
+
+    container.innerHTML = "";
+    upgradeData[type].forEach((item, index) => {
+      const owned = upgrades[type][item.name] || 0;
+      const canAfford = (type === "prestige" ? prestigePoints >= item.price : cookies >= item.price);
+      const alreadyOwned = owned > 0;
+      const shouldShow = canAfford || alreadyOwned;
+
+      if (shouldShow) {
+        const btn = document.createElement("button");
+        btn.textContent = `${item.name} (${type === "prestige" ? item.price + " PP" : item.price} Cookies) x${owned}`;
+        if (item.power) btn.textContent += ` [+${item.power} Klick]`;
+        if (item.cps) btn.textContent += ` [+${item.cps} CPS]`;
+        btn.onclick = () => buyUpgrade(type, index);
+        container.appendChild(btn);
+      }
+    });
+  });
+}
+
+// === PRESTIGE ===
+function prestige() {
+  if (cookies >= 1000000) {
+    const bonus = Math.floor(cookies / 1000000);
+    prestigePoints += bonus;
+    cookies = 0;
+    clickPower = 1;
+    cookiesPerSecond = 0;
+    upgrades = { click: {}, auto: {}, prestige: upgrades.prestige };
+    saveGame();
+    updateDisplay();
+    alert(`Prestige aktiviert! Du hast ${bonus} Prestige-Punkt(e) erhalten.`);
+  }
+}
+
+// === RESET ===
+function resetGame() {
+  if (confirm("Willst du wirklich alles zurücksetzen?")) {
+    if (confirm("Ganz sicher? Das kann nicht rückgängig gemacht werden!")) {
+      localStorage.removeItem("cookieClickerSave");
+      location.reload();
+    }
+  }
+}
+
+// === SPEICHERN / LADEN ===
+function saveGame() {
+  const save = {
+    cookies,
+    clickPower,
+    cookiesPerSecond,
+    prestigePoints,
+    upgrades
+  };
+  localStorage.setItem("cookieClickerSave", JSON.stringify(save));
+}
+
+function loadGame() {
+  const save = localStorage.getItem("cookieClickerSave");
+  if (save) {
+    const data = JSON.parse(save);
+    cookies = data.cookies || 0;
+    clickPower = data.clickPower || 1;
+    cookiesPerSecond = data.cookiesPerSecond || 0;
+    prestigePoints = data.prestigePoints || 0;
+    upgrades = data.upgrades || { click: {}, auto: {}, prestige: {} };
+  }
+}
+
+// === INIT ===
+loadGame();
 updateDisplay();
+
+// === NAVIGATION ===
+btnGame.onclick = () => {
+  gameView.classList.remove("hidden");
+  shopView.classList.add("hidden");
+};
+
+btnShop.onclick = () => {
+  shopView.classList.remove("hidden");
+  gameView.classList.add("hidden");
+};
+
+btnPrestige.onclick = prestige;
+btnReset.onclick = resetGame;
