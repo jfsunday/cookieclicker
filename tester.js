@@ -22,17 +22,17 @@ function binaryToText(binary) {
 
 function saveGame() {
   const cookies = document.getElementById("cookies").value;
-  const cps = document.getElementById("cps").value;
-  const clickStrength = document.getElementById("clickStrength").value;
+  const cookiesPerSecond = document.getElementById("cookiesPerSecond").value;
+  const clickPower = document.getElementById("clickPower").value;
   const upgrades = document.getElementById("upgrades").value;
-  const prestige = document.getElementById("prestige").value;
+  const prestigePoints = document.getElementById("prestigePoints").value;
   
   const gameData = {
     cookies: cookies,
-    cps: cps,
-    clickStrength: clickStrength,
+    cookiesPerSecond: cookiesPerSecond,
+    clickPower: clickPower,
     upgrades: upgrades,
-    prestige: prestige
+    prestigePoints: prestigePoints
   };
 
   const gameDataJSON = JSON.stringify(gameData);
