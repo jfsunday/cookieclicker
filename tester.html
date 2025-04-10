@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie Clicker Code Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 30px;
+      background-color: #fdf6f0;
+    }
+    input, button, textarea {
+      font-size: 16px;
+      padding: 5px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    textarea {
+      height: 100px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Cookie Clicker Testcode Generator (Binär)</h1>
+
+  <div class="section">
+    <h2>🔐 Code erzeugen</h2>
+    <label>Cookies:</label>
+    <input type="number" id="input-cookies" value="1000000">
+    
+    <label>Klickstärke:</label>
+    <input type="number" id="input-clickPower" value="50">
+    
+    <label>CPS:</label>
+    <input type="number" id="input-cps" value="500">
+    
+    <label>Prestige-Stufe:</label>
+    <input type="number" id="input-prestige" value="3">
+    
+    <button onclick="generateCode()">Code erzeugen</button>
+    
+    <label>Erzeugter Binärcode:</label>
+    <textarea id="output-code" readonly></textarea>
+  </div>
+
+  <div class="section">
+    <h2>🔍 Code entschlüsseln</h2>
+    <label>Binärcode einfügen:</label>
+    <textarea id="input-code"></textarea>
+    <button onclick="decodeCode()">Code anzeigen</button>
+    
+    <label>Entschlüsselter Spielstand:</label>
+    <textarea id="decoded-output" readonly></textarea>
+  </div>
+
+  <script>
+    function textToBinary(text) {
+      return text.split('').map(char =>
+        char.charCodeAt(0).toString(2).padStart(8, '0')
+      ).join(' ');
+    }
+
+    function binaryToText(binary) {
+      return binary.trim().split(' ').map(bin =>
+        String.fromCharCode(parseInt(bin, 2))
+      ).join('');
+    }
+
+    function generateCode() {
+      const saveData = {
+        cookies: parseInt(document.getElementById("input-cookies").value) || 0,
+        clickPower: parseInt(document.getElementById("input-clickPower").value) || 1,
+        cps: parseInt(document.getElementById("input-cps").value) || 0,
+        prestigeLevel: parseInt(document.getElementById("input-prestige").value) || 0
+      };
+      const json = JSON.stringify(saveData);
+      const binary = textToBinary(json);
+      document.getElementById("output-code").value = binary;
+    }
+
+    function decodeCode() {
+      try {
+        const binary = document.getElementById("input-code").value.trim();
+        const text = binaryToText(binary);
+        const parsed = JSON.parse(text);
+        document.getElementById("decoded-output").value = JSON.stringify(parsed, null, 2);
+      } catch (e) {
+        document.getElementById("decoded-output").value = "Ungültiger Binärcode!";
+      }
+    }
+  </script>
+
+</body>
+</html>
