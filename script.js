@@ -216,7 +216,10 @@ btnShop.onclick = () => {
 btnPrestige.onclick = prestige;
 btnReset.onclick = resetGame;
 
-// === EXPORT / IMPORT ===
+// ... dein kompletter Spielcode bleibt unverändert ...
+// hier geht's direkt weiter mit dem Export/Import-Bereich
+
+// === EXPORT / IMPORT (ohne Verschlüsselung) ===
 const btnExport = document.getElementById("export-button");
 const btnImport = document.getElementById("import-button");
 const exportBox = document.getElementById("export-box");
@@ -227,8 +230,7 @@ const importConfirm = document.getElementById("import-confirm");
 
 btnExport.onclick = () => {
   const save = localStorage.getItem("cookieClickerSave");
-  const encoded = btoa(save);
-  exportOutput.value = encoded;
+  exportOutput.value = save;
   exportBox.classList.remove("hidden");
   importBox.classList.add("hidden");
 };
@@ -240,11 +242,13 @@ btnImport.onclick = () => {
 
 importConfirm.onclick = () => {
   try {
-    const decoded = atob(importInput.value.trim());
-    localStorage.setItem("cookieClickerSave", decoded);
+    const input = importInput.value.trim();
+    JSON.parse(input); // testet, ob es gültig ist
+    localStorage.setItem("cookieClickerSave", input);
     alert("Import erfolgreich! Spiel wird neu geladen.");
     location.reload();
   } catch (e) {
-    alert("Ungültiger Code!");
+    alert("Ungültiger JSON-Code!");
   }
 };
+
