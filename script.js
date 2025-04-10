@@ -219,7 +219,7 @@ btnReset.onclick = resetGame;
 // ... dein kompletter Spielcode bleibt unverändert ...
 // hier geht's direkt weiter mit dem Export/Import-Bereich
 
-// === EXPORT / IMPORT (ohne Verschlüsselung) ===
+// === EXPORT / IMPORT (Base64-verschlüsselt) ===
 const btnExport = document.getElementById("export-button");
 const btnImport = document.getElementById("import-button");
 const exportBox = document.getElementById("export-box");
@@ -230,7 +230,8 @@ const importConfirm = document.getElementById("import-confirm");
 
 btnExport.onclick = () => {
   const save = localStorage.getItem("cookieClickerSave");
-  exportOutput.value = save;
+  const encoded = btoa(save); // verschlüsseln (Base64)
+  exportOutput.value = encoded;
   exportBox.classList.remove("hidden");
   importBox.classList.add("hidden");
 };
@@ -242,13 +243,12 @@ btnImport.onclick = () => {
 
 importConfirm.onclick = () => {
   try {
-    const input = importInput.value.trim();
-    JSON.parse(input); // testet, ob es gültig ist
-    localStorage.setItem("cookieClickerSave", input);
+    const decoded = atob(importInput.value.trim()); // entschlüsseln (Base64)
+    JSON.parse(decoded); // prüfen ob es gültig ist
+    localStorage.setItem("cookieClickerSave", decoded);
     alert("Import erfolgreich! Spiel wird neu geladen.");
     location.reload();
   } catch (e) {
-    alert("Ungültiger JSON-Code!");
+    alert("Ungültiger Code!");
   }
 };
-
