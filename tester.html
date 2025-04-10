@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Cookie Clicker Testcode Generator</title>
+  <title>Cookie Clicker Testcode Generator (Binär)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -58,21 +58,25 @@
   </div>
 
   <script>
-    // Funktion: Text in Binär umwandeln
-    function textToBinary(text) {
-      return text.split('').map(char =>
-        char.charCodeAt(0).toString(2).padStart(8, '0')
-      ).join(' ');
+    // Funktion: Umwandlung eines Zeichens in Binär
+    function stringToBinary(str) {
+      let binary = '';
+      for (let i = 0; i < str.length; i++) {
+        binary += str.charCodeAt(i).toString(2).padStart(8, '0');
+      }
+      return binary;
     }
 
-    // Funktion: Binär in Text umwandeln
-    function binaryToText(binary) {
-      return binary.split(' ').map(bin =>
-        String.fromCharCode(parseInt(bin, 2))
-      ).join('');
+    // Funktion: Umwandlung von Binär in Zeichen
+    function binaryToString(bin) {
+      let str = '';
+      for (let i = 0; i < bin.length; i += 8) {
+        str += String.fromCharCode(parseInt(bin.substring(i, i + 8), 2));
+      }
+      return str;
     }
 
-    // Funktion: Binär-Code erzeugen
+    // Funktion: Code erzeugen (Binär kodieren)
     function generateCode() {
       const saveData = {
         cookies: parseInt(document.getElementById("input-cookies").value) || 0,
@@ -81,32 +85,28 @@
         prestigeLevel: parseInt(document.getElementById("input-prestige").value) || 0
       };
       
-      // Umwandlung in JSON-String
-      const json = JSON.stringify(saveData);
+      // JSON-Daten als String
+      const jsonString = JSON.stringify(saveData);
       
-      // Umwandlung des JSON-Strings in Binär
-      const binary = textToBinary(json);
+      // Umwandlung der JSON-Daten in Binär
+      const binaryCode = stringToBinary(jsonString);
       
-      // Ausgabe des Binärcodes im Textfeld
-      document.getElementById("output-code").value = binary;
+      // Ausgabe des Binärcodes
+      document.getElementById("output-code").value = binaryCode;
     }
 
-    // Funktion: Binär-Code entschlüsseln
+    // Funktion: Code entschlüsseln (Binär in JSON zurück)
     function decodeCode() {
-      try {
-        // Binärcode aus der Eingabe holen und in Text umwandeln
-        const binary = document.getElementById("input-code").value.trim();
-        const text = binaryToText(binary);
-        
-        // Überprüfung, ob der Text gültiges JSON ist
-        const parsed = JSON.parse(text);
-        
-        // Den entschlüsselten Spielstand anzeigen
-        document.getElementById("decoded-output").value = JSON.stringify(parsed, null, 2);
-      } catch (e) {
-        // Fehlerbehandlung bei ungültigem Binärcode
-        document.getElementById("decoded-output").value = "Ungültiger Binär-Code!";
-      }
+      const binaryCode = document.getElementById("input-code").value;
+      
+      // Umwandlung von Binär in JSON
+      const jsonString = binaryToString(binaryCode);
+      
+      // Entschlüsselte Daten als JSON
+      const decodedData = JSON.parse(jsonString);
+      
+      // Ausgabe der entschlüsselten Daten
+      document.getElementById("decoded-output").value = `Cookies: ${decodedData.cookies}\nClick Power: ${decodedData.clickPower}\nCPS: ${decodedData.cps}\nPrestige-Level: ${decodedData.prestigeLevel}`;
     }
   </script>
 
